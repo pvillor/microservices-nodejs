@@ -1,32 +1,31 @@
 services:
-  broker:
-    image: rabbitmq:3-management
-    ports:
-      - "5672:5672"
-      - "15672:15672"
-    volumes:
-      - "rabbitmq_data:/var/lib/rabbitmq"
+  # broker:
+  #   image: rabbitmq:3-management
+  #   ports:
+  #     - "5672:5672"
+  #     - "15672:15672"
+  #   volumes:
+  #     - "rabbitmq_data:/var/lib/rabbitmq"
 
-  jaeger:
-    image: jaegertracing/all-in-one:1.57
-    ports:
-      - "16686:16686" # UI
-      - "6831:6831/udp" # Traces UDP
-      - "14268:14268" # Traces HTTP
-      - "4317:4317" # OTLP/gRPC
-      - "4318:4318" # OTLP/HTTP
+  # jaeger:
+  #   image: jaegertracing/all-in-one:1.57
+  #   ports:
+  #     - "16686:16686" # UI
+  #     - "6831:6831/udp" # Traces UDP
+  #     - "14268:14268" # Traces HTTP
+  #     - "4317:4317" # OTLP/gRPC
+  #     - "4318:4318" # OTLP/HTTP
 
   api-gateway:
-    image: kong:3.9
+    build:
+      context: './docker/kong'
     environment: 
       KONG_DATABASE: 'off'
       KONG_ADMIN_LISTEN: '0.0.0.0:8001'
-      KONG_ADMIN_GUI_URL: 'http://localhost:8002'
-      KONG_DECLARATIVE_CONFIG: '/kong/config.yaml'
+      KONG_ADMIN_GUI_URL: http://localhost:8002
+      ORDERS_SERVICE_URL: http://host.docker.internal:3333
     extra_hosts:
       - "host.docker.internal:host-gateway"
-    volumes:
-      - './docker/kong/config.yaml:/kong/config.yaml'
     ports:
       - "8000:8000" # Proxy (API)
       - "8001:8001" # API (Admin)
